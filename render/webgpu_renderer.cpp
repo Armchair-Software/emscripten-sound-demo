@@ -717,7 +717,7 @@ void webgpu_renderer::configure() {
   );
 }
 
-void webgpu_renderer::draw(vec2f const& rotation) {
+void webgpu_renderer::draw() {
   /// Draw a frame
   wgpu::TextureView texture_view{webgpu.swapchain.GetCurrentTextureView()};
   if(!texture_view) throw std::runtime_error{"Could not get current texture view from swap chain"};
@@ -775,7 +775,6 @@ void webgpu_renderer::draw(vec2f const& rotation) {
 
       // set up matrices
       static vec2f angles;
-      angles += rotation;
       angles.x += 0.01f;                                                        // constant slow spin
       quatf model_rotation{quatf::from_euler_angles_rad(0.0, angles.x, 0.0)};
 
