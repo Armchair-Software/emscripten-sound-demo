@@ -1,24 +1,18 @@
-[![CI Build](https://github.com/Armchair-Software/webgpu-demo2/actions/workflows/ci-build.yml/badge.svg)](https://github.com/Armchair-Software/webgpu-demo2/actions)
+[![CI Build](https://github.com/Armchair-Software/emscripten-sound-demo/actions/workflows/ci-build.yml/badge.svg)](https://github.com/Armchair-Software/emscripten-sound-demo/actions)
 
-# WebGPU Emscripten demo 2 for the Armchair Engine
+# Sound Demo for the WebGPU Emscripten Armchair Engine
 
-This is part two of a simple proof of concept, a minimal 3D engine written in C++, compiled to WASM with Emscripten.  Running in the browser, rendering with WebGPU.
-
-For the basic initial demo, see https://github.com/Armchair-Software/webgpu-demo.
-
-This is a follow-up, adding GUI rendering with [dear imgui](https://github.com/ocornut/imgui), demonstrating the new emscripten imgui backend.
-
-This also demonstrates how you might set up gamepad input with the above backend.  Plug in a gamepad, joystick, or other controller to test the integration - the cube can be rotated, and the gui can be interacted with.  There is no dependency on GLFW.
-
-![image](https://github.com/user-attachments/assets/7bb8d5bf-f627-4fa0-9bda-a6b5b47c9bbe)
+Description TODO
 
 For other demos, see:
+- https://github.com/Armchair-Software/webgpu-demo
+- https://github.com/Armchair-Software/webgpu-demo2
 - https://github.com/Armchair-Software/boids-webgpu-demo
 - https://github.com/Armchair-Software/webgpu-shader-demo
 - https://github.com/Armchair-Software/chatgpt-emscripten-demo
 
 ## Live demo
-Live demo: https://armchair-software.github.io/webgpu-demo2/
+Live demo: https://armchair-software.github.io/emscripten-sound-demo/
 
 This requires Firefox Nightly, or a recent version of Chrome or Chromium, with webgpu and Vulkan support explicitly enabled.
 
