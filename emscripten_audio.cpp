@@ -94,9 +94,16 @@ emscripten_audio::emscripten_audio(construction_options &&options)
                void *user_data) {
               /// Audio processing callback dispatcher
               auto &parent{*static_cast<emscripten_audio*>(user_data)};
-              if(parent.callbacks.input ) parent.callbacks.input( {inputs,  static_cast<size_t>(num_inputs )});
-              if(parent.callbacks.output) parent.callbacks.output({outputs, static_cast<size_t>(num_outputs)});
-              if(parent.callbacks.params) parent.callbacks.params({params,  static_cast<size_t>(num_params )});
+              if(parent.callbacks.input ) parent.callbacks.input( {inputs, static_cast<size_t>(num_inputs)});
+              if(parent.callbacks.params) parent.callbacks.params({params, static_cast<size_t>(num_params)});
+              if(parent.callbacks.output) {
+                parent.callbacks.output({outputs, static_cast<size_t>(num_outputs)});
+              } else {                                                          // if no output function is provided, output silence to avoid generating noise
+                for(unsigned int output_index{0}; output_index != num_outputs; ++output_index) {
+                  auto &output{outputs[output_index]};
+                  std::memset(output.data, 0, output.numberOfChannels * output.samplesPerChannel * sizeof(float)); // could use std::fill here but memset is reportedly faster, https://lemire.me/blog/2020/01/20/filling-large-arrays-with-zeroes-quickly-in-c/
+                }
+              }
               return true;                                                      // keep the graph output going
             },
             &parent
