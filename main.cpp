@@ -7,6 +7,21 @@
 #include "emscripten_audio.h"
 
 class game_manager {
+  struct audio_generator {
+    bool started{false};
+    float sample_rate{0.0f};                                                    // set by set_sample_rate
+    float target_tone_frequency{440.0f};
+    float target_volume{0.3f};
+
+    float phase{0.0f};
+    float phase_increment{0};                                                   // set by set_sample_rate
+    float current_volume{0.0};
+
+    void set_sample_rate(unsigned int sample_rate);
+
+    void output(std::span<AudioSampleFrame> outputs);
+  };
+
   logstorm::manager logger{logstorm::manager::build_with_sink<logstorm::sink::console>()}; // logging system
   render::webgpu_renderer renderer{logger};                                     // WebGPU rendering system
   gui::gui_renderer gui{logger};                                                // GUI top level
@@ -15,18 +30,9 @@ class game_manager {
       .playback_started{[&]{
         on_playback_started();
       }},
-      .output{[&](std::span<AudioSampleFrame> outputs){
-        audio_output(outputs);
-      }},
     },
   }};
-
-private:
-  float target_tone_frequency{440.0f};
-  float target_volume{0.3f};
-  float phase{0.0f};
-  float phase_increment{440 * 2.0f * boost::math::constants::pi<float>() / audio.get_sample_rate()};
-  float current_volume{0.3};
+  audio_generator tone_generator;
 
 public:
   game_manager();
@@ -39,7 +45,6 @@ private:
   void operator=(game_manager const&) = delete;
 
   void on_playback_started();
-  void audio_output(std::span<AudioSampleFrame> outputs);
 };
 
 game_manager::game_manager() {
@@ -67,19 +72,37 @@ game_manager::~game_manager() {
 
 void game_manager::loop_main() {
   /// Main pseudo-loop
-  gui.draw();
+  gui.draw(
+    tone_generator.started,
+    tone_generator.sample_rate,
+    tone_generator.target_tone_frequency,
+    tone_generator.target_volume,
+    tone_generator.phase,
+    tone_generator.phase_increment,
+    tone_generator.current_volume
+  );
   renderer.draw();
 }
 
 void game_manager::on_playback_started() {
   /// Playback started callback
   logger << "Audio: Starting playback after first user interaction";
+  tone_generator.set_sample_rate(audio.get_sample_rate());
+  audio.callbacks.output = [&](std::span<AudioSampleFrame> outputs){
+    tone_generator.output(outputs);
+  };
+  tone_generator.started = true;
 }
 
-void game_manager::audio_output(std::span<AudioSampleFrame> outputs) {
+void game_manager::audio_generator::set_sample_rate(unsigned int new_sample_rate) {
+  sample_rate = static_cast<float>(new_sample_rate);
+  phase_increment = target_tone_frequency * 2.0f * boost::math::constants::pi<float>() / sample_rate;
+}
+
+void game_manager::audio_generator::output(std::span<AudioSampleFrame> outputs) {
   // interpolate towards the target frequency and volume values
-  float targetphase_increment = target_tone_frequency * 2.0f * boost::math::constants::pi<float>() / audio.get_sample_rate();
-  phase_increment = phase_increment * 0.95f + 0.05f * targetphase_increment;
+  float const target_phase_increment{target_tone_frequency * 2.0f * boost::math::constants::pi<float>() / sample_rate};
+  phase_increment = phase_increment * 0.95f + 0.05f * target_phase_increment;
   current_volume = current_volume * 0.95f + 0.05f * target_volume;
 
   // produce a sine wave tone of desired frequency to all output channels
