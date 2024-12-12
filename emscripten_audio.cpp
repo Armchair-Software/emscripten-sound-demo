@@ -11,8 +11,8 @@ EMSCRIPTEN_KEEPALIVE void audio_worklet_unpause_return(void *callback_data) {
 
 }
 
-emscripten_audio::emscripten_audio(callback_types &&initial_callbacks)
-  : callbacks{std::move(initial_callbacks)} {
+emscripten_audio::emscripten_audio(construction_options &&options)
+  : callbacks{std::move(options.callbacks)} {
   /// Initialise an Emscripten audio worklet with the given callbacks
   sample_rate = static_cast<unsigned int>(EM_ASM_DOUBLE({
     var AudioContext = window.AudioContext || window.webkitAudioContext;

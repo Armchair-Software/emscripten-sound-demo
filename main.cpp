@@ -10,12 +10,14 @@ class game_manager {
   render::webgpu_renderer renderer{logger};                                     // WebGPU rendering system
   gui::gui_renderer gui{logger};                                                // GUI top level
   emscripten_audio audio{{
-    .playback_started{[&]{
-      on_playback_started();
-    }},
-    .output{[&](std::span<AudioSampleFrame> outputs){
-      audio_output(outputs);
-    }},
+    .callbacks{
+      .playback_started{[&]{
+        on_playback_started();
+      }},
+      .output{[&](std::span<AudioSampleFrame> outputs){
+        audio_output(outputs);
+      }},
+    },
   }};
 
   void loop_main();

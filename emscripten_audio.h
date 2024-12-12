@@ -18,6 +18,10 @@ public:
     std::function<void(std::span<AudioParamFrame const >)> params{};
   };
 
+  struct construction_options {
+    callback_types callbacks{};
+  };
+
 private:
   struct alignas(16) {
     std::array<uint8_t, 4096> audio_thread_stack;
@@ -32,7 +36,7 @@ private:
 public:
   callback_types callbacks;
 
-  emscripten_audio(callback_types &&initial_callbacks = {.playback_started{}, .input{}, .output{}, .params{}});
+  emscripten_audio(construction_options &&options = {.callbacks{.playback_started{}, .input{}, .output{}, .params{}}});
 
 private:
   void audio_worklet_unpause();
