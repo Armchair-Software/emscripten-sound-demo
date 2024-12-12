@@ -1,4 +1,5 @@
 #include <iostream>
+#include <emscripten/em_math.h>
 #include <imgui/imgui_impl_wgpu.h>
 #include "logstorm/logstorm.h"
 #include "gui/gui_renderer.h"
@@ -20,11 +21,18 @@ class game_manager {
     },
   }};
 
-  void loop_main();
+private:
+  float target_tone_frequency{440.0f};
+  float target_volume{0.3f};
+  float phase{0.0f};
+  float phase_increment{440 * 2.0f * boost::math::constants::pi<float>() / audio.get_sample_rate()};
+  float current_volume{0.3};
 
 public:
   game_manager();
   ~game_manager();
+
+  void loop_main();
 
 private:
   game_manager(game_manager const&) = delete;
@@ -69,12 +77,24 @@ void game_manager::on_playback_started() {
 }
 
 void game_manager::audio_output(std::span<AudioSampleFrame> outputs) {
-  /// Audio generation function
+  // interpolate towards the target frequency and volume values
+  float targetphase_increment = target_tone_frequency * 2.0f * boost::math::constants::pi<float>() / audio.get_sample_rate();
+  phase_increment = phase_increment * 0.95f + 0.05f * targetphase_increment;
+  current_volume = current_volume * 0.95f + 0.05f * target_volume;
+
+  // produce a sine wave tone of desired frequency to all output channels
   for(auto const &output : outputs) {
-    for(int j{0}; j != output.samplesPerChannel * output.numberOfChannels; ++j) {
-      output.data[j] = emscripten_random() * 0.2 - 0.1;                         // scale down audio volume by factor of 0.2, raw noise can be really loud otherwise
+    for(int i{0}; i < output.samplesPerChannel; ++i) {
+      float s{static_cast<float>(emscripten_math_sin(phase))};
+      phase += phase_increment;
+      for(int channel{0}; channel < output.numberOfChannels; ++channel) {
+        output.data[channel * output.samplesPerChannel + i] = s * current_volume;
+      }
     }
   }
+
+  // range reduce to keep precision around zero
+  phase = emscripten_math_fmod(phase, 2.0f * boost::math::constants::pi<float>());
 }
 
 auto main()->int {
