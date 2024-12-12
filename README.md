@@ -2,7 +2,9 @@
 
 # Sound Demo for the WebGPU Emscripten Armchair Engine
 
-Description TODO
+A simple tone generator.  Written in C++, compiled to WASM with Emscripten, running in the browser, on top of a WebGPU rendering back-end.  The sound generation runs away from the main thread, in a dedicated realtime-priority [audio worklet](https://developer.mozilla.org/en-US/docs/Web/API/AudioWorklet).
+
+This primarily demonstrates the [Emscripten Audio](https://github.com/Armchair-Software/emscripten-audio) system - a C++ helper class to assist in managing [Emscripten WASM Audio Worklets](https://emscripten.org/docs/api_reference/wasm_audio_worklets.html) with a simple interface.
 
 For other demos, see:
 - https://github.com/Armchair-Software/webgpu-demo
@@ -17,6 +19,7 @@ Live demo: https://armchair-software.github.io/emscripten-sound-demo/
 This requires Firefox Nightly, or a recent version of Chrome or Chromium, with webgpu and Vulkan support explicitly enabled.
 
 ## Dependencies
+- [Emscripten Audio](https://github.com/Armchair-Software/emscripten-audio) (included)
 - [Emscripten](https://emscripten.org/)
 - CMake
 - [VectorStorm](https://github.com/Armchair-Software/vectorstorm) (included)
