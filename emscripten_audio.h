@@ -49,10 +49,10 @@ private:
   latencies latency_hint{latencies::interactive};
   unsigned int sample_rate{0};
   states state{states::suspended};
+public:
   unsigned int const inputs{0};                                                 // number of inputs
   std::vector<unsigned int> const output_channels{2};                           // number of outputs, and channels for each output
 
-public:
   callback_types callbacks;
 
   emscripten_audio(construction_options &&options);
