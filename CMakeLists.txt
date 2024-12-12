@@ -129,6 +129,7 @@ add_executable(client
   gui/gui_renderer.cpp
   render/webgpu_renderer.cpp
   # shared libraries:
+  emscripten_audio.cpp
   logstorm/log_line_helper.cpp
   logstorm/manager.cpp
   logstorm/sink/base.cpp
