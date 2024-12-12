@@ -106,7 +106,7 @@ emscripten_audio::emscripten_audio(construction_options &&options)
 
           // register a once-only click handler to unpause audio, on the first click on the canvas
           EM_ASM({
-            canvas.addEventListener("click", (event) => {
+            window.addEventListener("click", (event) => {
               Module["ccall"]('audio_worklet_unpause_return', null, ['number'], [$0]);
             }, {once : true});
           }, &parent);
