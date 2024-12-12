@@ -156,6 +156,9 @@ target_compile_options(client PRIVATE
   -msse4.2
   -mavx
   -msimd128
+  # for workers
+  -mbulk-memory
+  -matomics
   # emscripten ports
   -sUSE_BOOST_HEADERS=1
   -sUSE_FREETYPE=1
@@ -214,13 +217,15 @@ target_link_options(client PRIVATE
   -sALLOW_MEMORY_GROWTH
   -sSTACK_SIZE=5mb
   -sWASM_BIGINT
+  -sWASM_WORKERS
   -sUSE_WEBGPU
   -sFETCH
+  -sAUDIO_WORKLET
   -sUSE_FREETYPE
   ${exception_link_options}
   -sEXPORTED_RUNTIME_METHODS=[ccall]
   -sLLD_REPORT_UNDEFINED
-  -sENVIRONMENT=web                                                             # don't emit code for node.js etc
+  -sENVIRONMENT=web,worker                                                      # don't emit code for node.js etc
   -sELIMINATE_DUPLICATE_FUNCTIONS
   #-sVERBOSE
   --shell-file=${CMAKE_SOURCE_DIR}/html/client.html
