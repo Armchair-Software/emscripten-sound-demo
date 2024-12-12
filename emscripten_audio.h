@@ -29,6 +29,7 @@ public:
     unsigned int inputs{0};                                                     // number of inputs
     std::vector<unsigned int> output_channels{2};                               // number of outputs, and number of channels for each output
     latencies latency_hint{latencies::interactive};                             // hint for requested latency mode
+    std::string worklet_name{"emscripten-audio-worklet"};
     callback_types callbacks{};                                                 // action and data processing callbacks
   };
 
@@ -45,8 +46,8 @@ private:
   };
 
   EMSCRIPTEN_WEBAUDIO_T context{};
-  std::string worklet_name{"emscripten-audio-worklet"};
-  latencies latency_hint{latencies::interactive};
+  std::string worklet_name{construction_options{}.worklet_name};
+  latencies latency_hint{construction_options{}.latency_hint};
   unsigned int sample_rate{0};
   states state{states::suspended};
 public:

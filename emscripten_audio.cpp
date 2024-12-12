@@ -19,7 +19,8 @@ static_assert(std::to_underlying(emscripten_audio::states::closed     ) == AUDIO
 static_assert(std::to_underlying(emscripten_audio::states::interrupted) == AUDIO_CONTEXT_STATE_INTERRUPTED);
 
 emscripten_audio::emscripten_audio(construction_options &&options)
-  : latency_hint{options.latency_hint},
+  : worklet_name{std::move(options.worklet_name)},
+    latency_hint{options.latency_hint},
     inputs{options.inputs},
     output_channels{std::move(options.output_channels)},
     callbacks{std::move(options.callbacks)} {
