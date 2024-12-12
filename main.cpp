@@ -16,6 +16,11 @@ class game_manager {
 
 public:
   game_manager();
+  ~game_manager();
+
+private:
+  game_manager(game_manager const&) = delete;
+  void operator=(game_manager const&) = delete;
 };
 
 game_manager::game_manager() {
@@ -34,6 +39,11 @@ game_manager::game_manager() {
     }
   );
   std::unreachable();
+}
+
+game_manager::~game_manager() {
+  /// Destructor for debugging purposes only
+  assert(false && "Game manager destructing, this should never happen!");
 }
 
 void game_manager::loop_main() {
