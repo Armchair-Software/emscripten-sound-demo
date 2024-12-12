@@ -158,6 +158,7 @@ target_compile_options(client PRIVATE
   -mavx
   -msimd128
   # for workers
+  -sWASM_WORKERS=2
   -mbulk-memory
   -matomics
   # emscripten ports
@@ -218,7 +219,7 @@ target_link_options(client PRIVATE
   -sALLOW_MEMORY_GROWTH
   -sSTACK_SIZE=5mb
   -sWASM_BIGINT
-  -sWASM_WORKERS
+  -sWASM_WORKERS=2
   -sUSE_WEBGPU
   -sFETCH
   -sAUDIO_WORKLET
