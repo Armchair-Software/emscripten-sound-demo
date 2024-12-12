@@ -20,6 +20,7 @@ class game_manager {
 
   EMSCRIPTEN_WEBAUDIO_T audio_context{};
   std::string audio_worklet_name{"Test Audio Worklet"};
+  unsigned int sample_rate{0};
   AUDIO_CONTEXT_STATE audio_state{AUDIO_CONTEXT_STATE_SUSPENDED};
 
   void loop_main();
@@ -52,15 +53,13 @@ EMSCRIPTEN_KEEPALIVE void audio_worklet_unpause_return(void *callback_data) {
 
 game_manager::game_manager() {
   /// Run the game
-  unsigned int sample_rate{
-    static_cast<unsigned int>(EM_ASM_DOUBLE({
-      var AudioContext = window.AudioContext || window.webkitAudioContext;
-      var ctx = new AudioContext();
-      var sr = ctx.sampleRate;
-      ctx.close();
-      return sr;
-    }))
-  };
+  sample_rate = static_cast<unsigned int>(EM_ASM_DOUBLE({
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    var ctx = new AudioContext();
+    var sr = ctx.sampleRate;
+    ctx.close();
+    return sr;
+  }));
   logger << "DEBUG: sample_rate " << sample_rate;
 
   EmscriptenWebAudioCreateAttributes create_audio_context_options{
