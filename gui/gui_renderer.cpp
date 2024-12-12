@@ -45,7 +45,7 @@ void gui_renderer::draw(bool started, float sample_rate, float &target_tone_freq
     ImGui::BeginDisabled();
     ImGui::InputFloat("Sample rate", &sample_rate, 0.0f, 0.0f, "%.0f", ImGuiInputTextFlags_ReadOnly);
     ImGui::EndDisabled();
-    ImGui::DragFloat("Target tone frequency", &target_tone_frequency);
+    ImGui::DragFloat("Target tone frequency", &target_tone_frequency, 2.0f, 0.0f, 96'000.0f, "%.0f");
     ImGui::SliderFloat("Target volume", &target_volume, 0.0f, 1.0f);
     ImGui::BeginDisabled();
     ImGui::SliderFloat("Current volume", &current_volume, 0.0f, 1.0f);
