@@ -57,6 +57,7 @@ public:
 
   emscripten_audio(construction_options &&options);
 
+  EMSCRIPTEN_WEBAUDIO_T get_context() const;
   states get_state() const;
 
 private:

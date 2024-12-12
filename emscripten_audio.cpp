@@ -117,6 +117,10 @@ emscripten_audio::emscripten_audio(construction_options &&options)
   );
 }
 
+EMSCRIPTEN_WEBAUDIO_T emscripten_audio::get_context() const {
+  return context;
+}
+
 emscripten_audio::states emscripten_audio::get_state() const {
   return state;
 }
