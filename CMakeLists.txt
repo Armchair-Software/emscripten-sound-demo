@@ -32,8 +32,8 @@ if(build_type STREQUAL "debug")
     # debugging
     -g3
     --profiling-funcs
-    # ensure fast link in debug mode: https://emscripten.org/docs/optimizing/Optimizing-Code.html#link-times
-    -sERROR_ON_WASM_CHANGES_AFTER_LINK
+    #-sSTACK_OVERFLOW_CHECK                                                      # validate workers don't overflow their stack
+    -sERROR_ON_WASM_CHANGES_AFTER_LINK                                          # ensure fast link in debug mode: https://emscripten.org/docs/optimizing/Optimizing-Code.html#link-times
   )
 elseif(build_type STREQUAL "release")
   message(STATUS "Build type is release - building with optimisation & minifying")
