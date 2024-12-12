@@ -60,6 +60,7 @@ public:
 
   EMSCRIPTEN_WEBAUDIO_T get_context() const;
   states get_state() const;
+  unsigned int get_sample_rate() const;
 
 private:
   void audio_worklet_unpause();

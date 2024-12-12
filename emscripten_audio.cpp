@@ -126,6 +126,10 @@ emscripten_audio::states emscripten_audio::get_state() const {
   return state;
 }
 
+unsigned int emscripten_audio::get_sample_rate() const {
+  return sample_rate;
+}
+
 void emscripten_audio::audio_worklet_unpause() {
   /// Unpause the audio after the first user click on the canvas
   state = static_cast<states>(emscripten_audio_context_state(context));         // AUDIO_CONTEXT_STATE_SUSPENDED=0, AUDIO_CONTEXT_STATE_RUNNING=1, AUDIO_CONTEXT_STATE_CLOSED=2. AUDIO_CONTEXT_STATE_INTERRUPTED=3
