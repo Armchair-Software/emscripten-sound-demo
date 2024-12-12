@@ -120,8 +120,9 @@ game_manager::game_manager() {
               auto &parent{*static_cast<game_manager*>(user_data)};
 
               for(int i{0}; i != num_outputs; ++i) {
-                for(int j{0}; j != outputs[i].samplesPerChannel * outputs[i].numberOfChannels; ++j) {
-                  outputs[i].data[j] = emscripten_random() * 0.2 - 0.1;         // scale down audio volume by factor of 0.2, raw noise can be really loud otherwise
+                auto const &output{outputs[i]};
+                for(int j{0}; j != output.samplesPerChannel * output.numberOfChannels; ++j) {
+                  output.data[j] = emscripten_random() * 0.2 - 0.1;             // scale down audio volume by factor of 0.2, raw noise can be really loud otherwise
                 }
               }
 
