@@ -2,9 +2,11 @@
 
 # Sound Demo for the WebGPU Emscripten Armchair Engine
 
-A simple tone generator.  Written in C++, compiled to WASM with Emscripten, running in the browser, on top of a WebGPU rendering back-end.  The sound generation runs away from the main thread, in a dedicated realtime-priority [audio worklet](https://developer.mozilla.org/en-US/docs/Web/API/AudioWorklet).
+A simple tone generator.  Written in C++, compiled to WASM with Emscripten, running in the browser, on top of a WebGPU rendering back-end.
 
 This primarily demonstrates the [Emscripten Audio](https://github.com/Armchair-Software/emscripten-audio) system - a C++ helper class to assist in managing [Emscripten WASM Audio Worklets](https://emscripten.org/docs/api_reference/wasm_audio_worklets.html) with a simple interface.
+
+This is a very low-latency approach, as the sound generation runs away from the main thread, in a dedicated realtime-priority [audio worklet](https://developer.mozilla.org/en-US/docs/Web/API/AudioWorklet).
 
 For other demos, see:
 - https://github.com/Armchair-Software/webgpu-demo
