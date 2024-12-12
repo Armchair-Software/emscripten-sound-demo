@@ -223,6 +223,7 @@ target_link_options(client PRIVATE
   -sFETCH
   -sAUDIO_WORKLET
   -sUSE_FREETYPE
+  -sWEBAUDIO_DEBUG
   ${exception_link_options}
   -sEXPORTED_RUNTIME_METHODS=[ccall]
   -sLLD_REPORT_UNDEFINED
