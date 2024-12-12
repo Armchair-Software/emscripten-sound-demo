@@ -40,7 +40,6 @@ elseif(build_type STREQUAL "release")
   set(opt_and_debug_compiler_options
     # optimisations
     -O3
-    # re-enable once boost "result_of" errors are resolved in sysroot/lib/wasm32-emscripten/lto/libboost_headers.a
     -flto
     # debugging disabled
     -g0
@@ -51,8 +50,8 @@ elseif(build_type STREQUAL "release")
     --no-demangle
     -flto
     --closure 1
-    # currently broken:
-    #-sEVAL_CTORS
+    #-sMODULARIZE
+    #-sEVAL_CTORS                                                                # currently broken
     # debugging disabled
     -g0
   )
