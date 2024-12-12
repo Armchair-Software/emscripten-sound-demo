@@ -99,8 +99,7 @@ emscripten_audio::emscripten_audio(construction_options &&options)
               if(parent.callbacks.output) {
                 parent.callbacks.output({outputs, static_cast<size_t>(num_outputs)});
               } else {                                                          // if no output function is provided, output silence to avoid generating noise
-                for(unsigned int output_index{0}; output_index != num_outputs; ++output_index) {
-                  auto &output{outputs[output_index]};
+                for(auto &output : std::span{outputs, static_cast<size_t>(num_outputs)}) {
                   std::memset(output.data, 0, static_cast<size_t>(output.numberOfChannels) * static_cast<size_t>(output.samplesPerChannel) * sizeof(float)); // could use std::fill here but memset is reportedly faster, https://lemire.me/blog/2020/01/20/filling-large-arrays-with-zeroes-quickly-in-c/
                 }
               }
