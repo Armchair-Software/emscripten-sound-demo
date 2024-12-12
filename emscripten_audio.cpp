@@ -1,5 +1,6 @@
 #include "emscripten_audio.h"
 #include <iostream>
+#include <limits>
 #include <magic_enum/magic_enum.hpp>
 
 extern "C" {
@@ -12,10 +13,20 @@ EMSCRIPTEN_KEEPALIVE void audio_worklet_unpause_return(void *callback_data) {
 
 }
 
+static_assert(std::to_underlying(emscripten_audio::states::suspended  ) == AUDIO_CONTEXT_STATE_SUSPENDED  ); // make sure enums stay in sync in case of future updates to Emscripten
+static_assert(std::to_underlying(emscripten_audio::states::running    ) == AUDIO_CONTEXT_STATE_RUNNING    );
+static_assert(std::to_underlying(emscripten_audio::states::closed     ) == AUDIO_CONTEXT_STATE_CLOSED     );
+static_assert(std::to_underlying(emscripten_audio::states::interrupted) == AUDIO_CONTEXT_STATE_INTERRUPTED);
+
 emscripten_audio::emscripten_audio(construction_options &&options)
   : latency_hint{options.latency_hint},
+    inputs{options.inputs},
+    output_channels{std::move(options.output_channels)},
     callbacks{std::move(options.callbacks)} {
   /// Initialise an Emscripten audio worklet with the given callbacks
+  assert(inputs <= std::numeric_limits<int>::max());
+  assert(output_channels.size() <= std::numeric_limits<int>::max());
+
   sample_rate = static_cast<unsigned int>(EM_ASM_DOUBLE({
     var AudioContext = window.AudioContext || window.webkitAudioContext;
     var ctx = new AudioContext();
@@ -39,7 +50,7 @@ emscripten_audio::emscripten_audio(construction_options &&options)
       /// Callback that runs when audio creation is complete (either success or fail)
       auto &parent{*static_cast<emscripten_audio*>(user_data)};
       if(!success) {
-        std::cerr << "ERROR: Audio worklet start failed for context " << audio_context << std::endl;
+        std::cerr << "ERROR: Emscripten Audio: Worklet start failed for context " << audio_context << std::endl;
         return;
       }
       parent.context = audio_context;
@@ -56,17 +67,21 @@ emscripten_audio::emscripten_audio(construction_options &&options)
           /// Callback that runs when the worklet processor creation has completed (either success or fail)
           auto &parent{*static_cast<emscripten_audio*>(user_data)};
           if(!success) {
-            std::cerr << "ERROR: Audio worklet processor creation failed for context " << audio_context << std::endl;
+            std::cerr << "ERROR: Emscripten Audio: Worklet processor creation failed for context " << audio_context << std::endl;
             return;
           }
 
-          std::array<int, 1> output_channel_counts{2};                          // 1 = mono, 2 = stereo
-          // TODO: enum, configurable
+          std::vector<int> output_channels_int;
+          output_channels_int.reserve(parent.output_channels.size());
+          for(auto const &channel : parent.output_channels) {                   // convert container of channels to a vector of non-const signed ints as required by emscripten
+            assert(channel < std::numeric_limits<int>::max());
+            output_channels_int.emplace_back(static_cast<int>(channel));
+          }
 
           EmscriptenAudioWorkletNodeCreateOptions worklet_node_create_options{
-            .numberOfInputs{0},
-            .numberOfOutputs{output_channel_counts.size()},
-            .outputChannelCounts{output_channel_counts.data()},
+            .numberOfInputs{static_cast<int>(parent.inputs)},
+            .numberOfOutputs{static_cast<int>(output_channels_int.size())},
+            .outputChannelCounts{output_channels_int.data()},
           };
           EMSCRIPTEN_AUDIO_WORKLET_NODE_T audio_worklet{emscripten_create_wasm_audio_worklet_node( // create node
             audio_context,
@@ -102,16 +117,23 @@ emscripten_audio::emscripten_audio(construction_options &&options)
   );
 }
 
+emscripten_audio::states emscripten_audio::get_state() const {
+  return state;
+}
+
 void emscripten_audio::audio_worklet_unpause() {
   /// Unpause the audio after the first user click on the canvas
-  state = emscripten_audio_context_state(context);
-  if(state == AUDIO_CONTEXT_STATE_RUNNING) return;                              // AUDIO_CONTEXT_STATE_SUSPENDED=0, AUDIO_CONTEXT_STATE_RUNNING=1, AUDIO_CONTEXT_STATE_CLOSED=2. AUDIO_CONTEXT_STATE_INTERRUPTED=3
+  state = static_cast<states>(emscripten_audio_context_state(context));         // AUDIO_CONTEXT_STATE_SUSPENDED=0, AUDIO_CONTEXT_STATE_RUNNING=1, AUDIO_CONTEXT_STATE_CLOSED=2. AUDIO_CONTEXT_STATE_INTERRUPTED=3
+  if(state == states::running) {                                                // if for some reason autoplay was not prevented, we might be running already
+    if(callbacks.playback_started) callbacks.playback_started();
+    return;
+  }
 
   emscripten_resume_audio_context_async(
     context,
     [](EMSCRIPTEN_WEBAUDIO_T /*audio_context*/, AUDIO_CONTEXT_STATE state, void *user_data){ // EmscriptenResumeAudioContextCallback
       auto &parent{*static_cast<emscripten_audio*>(user_data)};
-      parent.state = state;
+      parent.state = static_cast<states>(state);
       if(parent.callbacks.playback_started) parent.callbacks.playback_started();
     },
     this

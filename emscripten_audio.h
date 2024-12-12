@@ -3,6 +3,7 @@
 #include <functional>
 #include <span>
 #include <string>
+#include <vector>
 #include <emscripten/webaudio.h>
 
 extern "C" {
@@ -25,8 +26,17 @@ public:
   };
 
   struct construction_options {
-    latencies latency_hint{latencies::interactive};
-    callback_types callbacks{};
+    unsigned int inputs{0};                                                     // number of inputs
+    std::vector<unsigned int> output_channels{2};                               // number of outputs, and number of channels for each output
+    latencies latency_hint{latencies::interactive};                             // hint for requested latency mode
+    callback_types callbacks{};                                                 // action and data processing callbacks
+  };
+
+  enum class states {                                                           // equivalent to AUDIO_CONTEXT_STATE_* macros
+    suspended,
+    running,
+    closed,
+    interrupted,
   };
 
 private:
@@ -38,13 +48,16 @@ private:
   std::string worklet_name{"emscripten-audio-worklet"};
   latencies latency_hint{latencies::interactive};
   unsigned int sample_rate{0};
-  AUDIO_CONTEXT_STATE state{AUDIO_CONTEXT_STATE_SUSPENDED};
-  // TODO: enum, getter
+  states state{states::suspended};
+  unsigned int const inputs{0};                                                 // number of inputs
+  std::vector<unsigned int> const output_channels{2};                           // number of outputs, and channels for each output
 
 public:
   callback_types callbacks;
 
   emscripten_audio(construction_options &&options);
+
+  states get_state() const;
 
 private:
   void audio_worklet_unpause();
