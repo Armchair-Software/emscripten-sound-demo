@@ -1,5 +1,6 @@
 #include "emscripten_audio.h"
 #include <iostream>
+#include <magic_enum/magic_enum.hpp>
 
 extern "C" {
 
@@ -12,7 +13,8 @@ EMSCRIPTEN_KEEPALIVE void audio_worklet_unpause_return(void *callback_data) {
 }
 
 emscripten_audio::emscripten_audio(construction_options &&options)
-  : callbacks{std::move(options.callbacks)} {
+  : latency_hint{options.latency_hint},
+    callbacks{std::move(options.callbacks)} {
   /// Initialise an Emscripten audio worklet with the given callbacks
   sample_rate = static_cast<unsigned int>(EM_ASM_DOUBLE({
     var AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -22,9 +24,9 @@ emscripten_audio::emscripten_audio(construction_options &&options)
     return sr;
   }));
 
+  std::string const &latency_hint_str{magic_enum::enum_name(latency_hint)};
   EmscriptenWebAudioCreateAttributes create_audio_context_options{
-    .latencyHint{"interactive"},                                                // one of "balanced", "interactive" or "playback"
-    // TODO: enum name
+    .latencyHint{latency_hint_str.c_str()},                                     // one of "balanced", "interactive" or "playback"
     .sampleRate{sample_rate},                                                   // 44100 or 48000
   };
   EMSCRIPTEN_WEBAUDIO_T emscripten_audio_context{emscripten_create_audio_context(&create_audio_context_options)};
