@@ -87,7 +87,9 @@ void game_manager::on_playback_started() {
   /// Playback started callback
   logger << "Audio: Starting playback after first user interaction";
   tone_generator.set_sample_rate(audio.get_sample_rate());
-  audio.callbacks.output = [&](std::span<AudioSampleFrame> outputs){
+  audio.callbacks.processing = [&](std::span<AudioSampleFrame const> /*inputs*/,
+                                   std::span<AudioSampleFrame> outputs,
+                                   std::span<AudioParamFrame const > /*params*/){
     tone_generator.output(outputs);
   };
   tone_generator.started = true;
