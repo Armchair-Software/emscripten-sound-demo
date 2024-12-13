@@ -62,7 +62,7 @@ echo "Running make..."
 #emmake make -j"$procs" VERBOSE=1 "$target" || exit 1
 emmake make -j"$procs" "$target" || exit 1
 
-#echo "Assembling resources..."
-#cd ..
-#rsync -ar --progress "resources/"* "$build_dir/"
+echo "Assembling resources..."
+cd ..
+rsync -ar --progress "resources/"* "$build_dir/"
 echo "Done."
