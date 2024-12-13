@@ -28,6 +28,10 @@ emscripten_audio::emscripten_audio(construction_options &&options)
   assert(inputs <= std::numeric_limits<int>::max());
   assert(output_channels.size() <= std::numeric_limits<int>::max());
 
+  if(EM_ASM_INT({return window.crossOriginIsolated ? 1 : 0;}) == 0) {
+    std::cerr << "ERROR: Emscripten Audio: Not cross origin isolated - won't be able to use SharedArrayBuffer!" << std::endl;
+  }
+
   sample_rate = static_cast<unsigned int>(EM_ASM_DOUBLE({
     var AudioContext = window.AudioContext || window.webkitAudioContext;
     var ctx = new AudioContext();
