@@ -47,12 +47,12 @@ emscripten_audio::emscripten_audio(construction_options &&options)
   };
   EMSCRIPTEN_WEBAUDIO_T emscripten_audio_context{emscripten_create_audio_context(&create_audio_context_options)};
 
-  emscripten_start_wasm_audio_worklet_thread_async(
+  emscripten_start_wasm_audio_worklet_thread_async(                             // create the worklet thread
     emscripten_audio_context,
     audio_thread_stack.data(),
     audio_thread_stack.size(),
     [](EMSCRIPTEN_WEBAUDIO_T audio_context, bool success, void *user_data) {    // EmscriptenStartWebAudioWorkletCallback
-      /// Callback that runs when audio creation is complete (either success or fail)
+      /// Callback that runs when audio thread creation is complete (either success or fail)
       auto &parent{*static_cast<emscripten_audio*>(user_data)};
       if(!success) {
         std::cerr << "ERROR: Emscripten Audio: Worklet start failed for context " << audio_context << std::endl;
@@ -65,7 +65,7 @@ emscripten_audio::emscripten_audio(construction_options &&options)
         .numAudioParams{0},
         .audioParamDescriptors{nullptr},
       };
-      emscripten_create_wasm_audio_worklet_processor_async(
+      emscripten_create_wasm_audio_worklet_processor_async(                     // create a processor
         audio_context,
         &worklet_create_options,
         [](EMSCRIPTEN_WEBAUDIO_T audio_context, bool success, void *user_data) { // EmscriptenWorkletProcessorCreatedCallback
@@ -83,7 +83,7 @@ emscripten_audio::emscripten_audio(construction_options &&options)
             output_channels_int.emplace_back(static_cast<int>(channel));
           }
 
-          EmscriptenAudioWorkletNodeCreateOptions worklet_node_create_options{
+          EmscriptenAudioWorkletNodeCreateOptions worklet_node_create_options{  // create a node
             .numberOfInputs{static_cast<int>(parent.inputs)},
             .numberOfOutputs{static_cast<int>(output_channels_int.size())},
             .outputChannelCounts{output_channels_int.data()},
