@@ -61,6 +61,10 @@ private:
 
 public:
   void draw();
+
+  wgpu::Device const &get_device() const;
+  wgpu::TextureFormat get_surface_preferred_format() const;
+  wgpu::TextureFormat get_depth_texture_format() const;
 };
 
 }

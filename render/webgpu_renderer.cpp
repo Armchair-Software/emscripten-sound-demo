@@ -886,4 +886,15 @@ void webgpu_renderer::draw() {
   }
 }
 
+wgpu::Device const &webgpu_renderer::get_device() const {
+  assert(state == states::ready_to_draw);
+  return webgpu.device;
+}
+wgpu::TextureFormat webgpu_renderer::get_surface_preferred_format() const {
+  return webgpu.surface_preferred_format;
+}
+wgpu::TextureFormat webgpu_renderer::get_depth_texture_format() const {
+  return webgpu.depth_texture_format;
+}
+
 }
