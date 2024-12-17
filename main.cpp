@@ -61,7 +61,6 @@ game_manager::game_manager() {
       loop_main();
     }
   );
-  std::unreachable();
 }
 
 game_manager::~game_manager() {
@@ -123,8 +122,7 @@ void game_manager::audio_generator::output(std::span<AudioSampleFrame> outputs) 
 
 auto main()->int {
   try {
-    game_manager game;
-    std::unreachable();
+    new game_manager;
 
   } catch (std::exception const &e) {
     std::cerr << "Exception: " << e.what() << std::endl;

@@ -498,8 +498,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
     /// Dispatch the loop waiting for WebGPU to become ready
     auto &renderer{*static_cast<webgpu_renderer*>(data)};
     renderer.wait_to_configure_loop();
-  }, this, 0, true);                                                            // loop function, user data, FPS (0 to use browser requestAnimationFrame mechanism), simulate infinite loop
-  std::unreachable();
+  }, this, 0, false);                                                           // loop function, user data, FPS (0 to use browser requestAnimationFrame mechanism), don't simulate infinite loop
 }
 
 void webgpu_renderer::init_swapchain() {
@@ -568,8 +567,7 @@ void webgpu_renderer::wait_to_configure_loop() {
     /// Main pseudo-loop waiting for initialisation to complete
     auto &renderer{*static_cast<webgpu_renderer*>(data)};
     renderer.main_loop_callback();
-  }, this, 0, true);                                                            // loop function, user data, FPS (0 to use browser requestAnimationFrame mechanism), simulate infinite loop
-  std::unreachable();
+  }, this, 0, false);                                                           // loop function, user data, FPS (0 to use browser requestAnimationFrame mechanism), don't simulate infinite loop
 }
 
 void webgpu_renderer::configure() {
