@@ -14,6 +14,8 @@
 #include "uniforms.h"
 #include "shaders/default.wgsl.h"
 
+//#define DEBUG_WEBGPU
+
 namespace render {
 
 namespace {
@@ -145,7 +147,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
         if(!adapter) throw std::runtime_error{"WebGPU: Could not acquire adapter"};
 
         // report surface and adapter capabilities
-        #ifndef NDEBUG
+        #ifdef DEBUG_WEBGPU
           {
             wgpu::SurfaceCapabilities surface_capabilities;
             webgpu.surface.GetCapabilities(adapter, &surface_capabilities);
@@ -159,7 +161,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
               logger << "DEBUG: WebGPU surface capabilities: alpha modes: " << magic_enum::enum_name(surface_capabilities.alphaModes[i]);
             }
           }
-        #endif // NDEBUG
+        #endif // DEBUG_WEBGPU
         webgpu.surface_preferred_format = webgpu.surface.GetPreferredFormat(adapter);
         logger << "WebGPU surface preferred format for this adapter: " << magic_enum::enum_name(webgpu.surface_preferred_format);
         if(webgpu.surface_preferred_format == wgpu::TextureFormat::Undefined) {
@@ -170,7 +172,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
         {
           wgpu::AdapterInfo adapter_info;
           adapter.GetInfo(&adapter_info);
-          #ifndef NDEBUG
+          #ifdef DEBUG_WEBGPU
             logger << "DEBUG: WebGPU adapter info: vendor: " << adapter_info.vendor;
             logger << "DEBUG: WebGPU adapter info: architecture: " << adapter_info.architecture;
             logger << "DEBUG: WebGPU adapter info: device: " << adapter_info.device;
@@ -178,10 +180,10 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
             logger << "DEBUG: WebGPU adapter info: vendorID:deviceID: " << adapter_info.vendorID << ":" << adapter_info.deviceID;
             logger << "DEBUG: WebGPU adapter info: backendType: " << magic_enum::enum_name(adapter_info.backendType);
             logger << "DEBUG: WebGPU adapter info: adapterType: " << magic_enum::enum_name(adapter_info.adapterType);
-          #endif // NDEBUG
+          #endif // DEBUG_WEBGPU
           logger << "WebGPU adapter info: " << adapter_info.description << " (" << magic_enum::enum_name(adapter_info.backendType) << ", " << adapter_info.vendor << ", " << adapter_info.architecture << ")";
         }
-        #ifndef NDEBUG
+        #ifdef DEBUG_WEBGPU
           {
             wgpu::AdapterProperties adapter_properties;
             adapter.GetProperties(&adapter_properties);
@@ -197,7 +199,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
             logger << "DEBUG: WebGPU adapter properties: compatibilityMode: " << std::boolalpha << adapter_properties.compatibilityMode;
             logger << "DEBUG: WebGPU adapter properties: nextInChain: " << adapter_properties.nextInChain;
           }
-        #endif // NDEBUG
+        #endif // DEBUG_WEBGPU
         std::set<wgpu::FeatureName> adapter_features;
         {
           // see https://developer.mozilla.org/en-US/docs/Web/API/GPUSupportedFeatures and https://www.w3.org/TR/webgpu/#feature-index
@@ -216,7 +218,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
         wgpu::SupportedLimits adapter_limits;
         bool const result{adapter.GetLimits(&adapter_limits)};
         if(!result) throw std::runtime_error{"WebGPU: Could not query adapter limits"};
-        #ifndef NDEBUG
+        #ifdef DEBUG_WEBGPU
           logger << "DEBUG: WebGPU adapter limits result: " << std::boolalpha << result;
           logger << "DEBUG: WebGPU adapter limits nextInChain: " << adapter_limits.nextInChain;
           logger << "DEBUG: WebGPU adapter limits maxTextureDimension1D: " << adapter_limits.limits.maxTextureDimension1D;
@@ -250,7 +252,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
           logger << "DEBUG: WebGPU adapter limits maxComputeWorkgroupSizeY: " << adapter_limits.limits.maxComputeWorkgroupSizeY;
           logger << "DEBUG: WebGPU adapter limits maxComputeWorkgroupSizeZ: " << adapter_limits.limits.maxComputeWorkgroupSizeZ;
           logger << "DEBUG: WebGPU adapter limits maxComputeWorkgroupsPerDimension: " << adapter_limits.limits.maxComputeWorkgroupsPerDimension;
-        #endif // NDEBUG
+        #endif // DEBUG_WEBGPU
 
         // specify required features for the device
         std::set<wgpu::FeatureName> required_features{
@@ -416,9 +418,9 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
             std::set<wgpu::FeatureName> device_features;
             {
               auto const count{device.EnumerateFeatures(nullptr)};
-              #ifndef NDEBUG
+              #ifdef DEBUG_WEBGPU
                 logger << "DEBUG: WebGPU device features count: " << count;
-              #endif // NDEBUG
+              #endif // DEBUG_WEBGPU
               std::vector<wgpu::FeatureName> device_features_arr(count);
               device.EnumerateFeatures(device_features_arr.data());
               for(unsigned int i{0}; i != device_features_arr.size(); ++i) {
@@ -428,7 +430,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
             for(auto const feature : device_features) {
               logger << "DEBUG: WebGPU device features: " << magic_enum::enum_name(feature);
             }
-            #ifndef NDEBUG
+            #ifdef DEBUG_WEBGPU
               {
                 wgpu::SupportedLimits adapter_limits;
                 bool result{device.GetLimits(&adapter_limits)};
@@ -466,7 +468,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
                 logger << "DEBUG: WebGPU device limits maxComputeWorkgroupSizeZ: " << adapter_limits.limits.maxComputeWorkgroupSizeZ;
                 logger << "DEBUG: WebGPU device limits maxComputeWorkgroupsPerDimension: " << adapter_limits.limits.maxComputeWorkgroupsPerDimension;
               }
-            #endif // NDEBUG
+            #endif // DEBUG_WEBGPU
 
             device.SetUncapturedErrorCallback(
               [](WGPUErrorType type, char const *message, void *data){
