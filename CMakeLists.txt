@@ -59,8 +59,7 @@ else()
   message(FATAL_ERROR "Invalid build type \"${CMAKE_BUILD_TYPE}\"")
 endif()
 
-set(EXCEPTION_HANDLING js CACHE STRING "Exception handling mode: none, js or wasm")
-# enable wasm when support improves (https://emscripten.org/docs/porting/exceptions.html)
+set(EXCEPTION_HANDLING wasm CACHE STRING "Exception handling mode: none, js or wasm")
 if(EXCEPTION_HANDLING STREQUAL "none")
   message(STATUS "Exception handling disabled")
   set(exception_compile_definitions
@@ -85,12 +84,10 @@ elseif(EXCEPTION_HANDLING STREQUAL "js")
     NO_DISABLE_EXCEPTION_CATCHING
   )
   set(exception_compile_options
-    # inefficient javascript exceptions:
-    -sNO_DISABLE_EXCEPTION_CATCHING
+    -fexceptions                                                                # inefficient javascript exceptions
   )
   set(exception_link_options
-    # inefficient javascript exceptions:
-    -sNO_DISABLE_EXCEPTION_CATCHING
+    -fexceptions                                                                # inefficient javascript exceptions
   )
 elseif(EXCEPTION_HANDLING STREQUAL "wasm")
   message(STATUS "Exception handling using WASM)")
@@ -98,14 +95,12 @@ elseif(EXCEPTION_HANDLING STREQUAL "wasm")
     NO_DISABLE_EXCEPTION_CATCHING
   )
   set(exception_compile_options
-    # enable native wasm exceptions
-    -fwasm-exceptions
-    -sSUPPORT_LONGJMP=wasm
+    -fwasm-exceptions                                                           # enable native wasm exceptions
+    #-sSUPPORT_LONGJMP=wasm
   )
   set(exception_link_options
-    # enable native wasm exceptions
-    -fwasm-exceptions
-    -sSUPPORT_LONGJMP=wasm
+    -fwasm-exceptions                                                           # enable native wasm exceptions
+    #-sSUPPORT_LONGJMP=wasm
   )
 else()
   message(FATAL_ERROR "Invalid exception handling mode \"${EXCEPTION_HANDLING}\"")
