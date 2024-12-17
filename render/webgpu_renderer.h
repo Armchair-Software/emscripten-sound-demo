@@ -34,6 +34,15 @@ public:
     friend class webgpu_renderer;
   };
 
+  enum class states {
+    uninitialised,
+    ready_to_init,
+    waiting_for_device,
+    ready_to_configure,
+    ready_to_draw,
+    failed,
+  } state{states::uninitialised};
+
 private:
   webgpu_data webgpu;
 

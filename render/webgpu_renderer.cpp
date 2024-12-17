@@ -115,10 +115,12 @@ webgpu_renderer::webgpu_renderer(logstorm::manager &this_logger)
     webgpu.surface = webgpu.instance.CreateSurface(&surface_descriptor);
   }
   if(!webgpu.surface) throw std::runtime_error{"Could not create WebGPU surface"};
+  state = states::ready_to_init;
 }
 
 void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postinit_callback, std::function<void()> &&this_main_loop_callback) {
   /// Initialise the WebGPU system
+  assert(state == states::ready_to_init);
   postinit_callback = this_postinit_callback;
   main_loop_callback = this_main_loop_callback;
 
@@ -395,6 +397,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
             auto &renderer{*static_cast<webgpu_renderer*>(data)};
             auto &logger{renderer.logger};
             logger << "ERROR: WebGPU lost device, reason " << enum_wgpu_name<wgpu::DeviceLostReason>(reason_c) << ": " << message;
+            renderer.state = states::failed;
           }},
           .deviceLostUserdata{&renderer},
         };
@@ -476,9 +479,12 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
                 auto &renderer{*static_cast<webgpu_renderer*>(data)};
                 auto &logger{renderer.logger};
                 logger << "ERROR: WebGPU uncaptured error " << enum_wgpu_name<wgpu::ErrorType>(type) << ": " << message;
+                renderer.state = states::failed;
               },
               &renderer
             );
+
+            renderer.state = states::ready_to_configure;
           },
           data
         );
@@ -486,6 +492,7 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
       this
     );
   }
+  state = states::waiting_for_device;
 
   emscripten_set_main_loop_arg([](void *data){
     /// Dispatch the loop waiting for WebGPU to become ready
@@ -567,6 +574,7 @@ void webgpu_renderer::wait_to_configure_loop() {
 
 void webgpu_renderer::configure() {
   /// When the device is ready, configure the WebGPU system
+  assert(state == states::ready_to_configure);
   logger << "WebGPU device ready, configuring surface";
   {
     wgpu::SurfaceConfiguration surface_configuration{
@@ -717,10 +725,13 @@ void webgpu_renderer::configure() {
       return true;                                                              // the event was consumed
     })
   );
+
+  state = states::ready_to_draw;
 }
 
 void webgpu_renderer::draw() {
   /// Draw a frame
+  assert(state == states::ready_to_draw);
   wgpu::TextureView texture_view{webgpu.swapchain.GetCurrentTextureView()};
   if(!texture_view) throw std::runtime_error{"Could not get current texture view from swap chain"};
 
