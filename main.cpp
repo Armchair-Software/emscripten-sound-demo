@@ -108,10 +108,10 @@ void game_manager::audio_generator::output(std::span<AudioSampleFrame> outputs) 
   // produce a sine wave tone of desired frequency to all output channels
   for(auto const &output : outputs) {
     for(int i{0}; i != output.samplesPerChannel; ++i) {
-      float s{static_cast<float>(std::sin(phase))};
+      float const sample{static_cast<float>(std::sin(phase)) * current_volume};
       phase += phase_increment;
       for(int channel{0}; channel != output.numberOfChannels; ++channel) {
-        output.data[channel * output.samplesPerChannel + i] = s * current_volume;
+        output.data[channel * output.samplesPerChannel + i] = sample;
       }
     }
   }
