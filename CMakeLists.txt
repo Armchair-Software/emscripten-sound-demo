@@ -142,6 +142,7 @@ add_executable(client
 
 target_compile_options(client PRIVATE
   ${opt_and_debug_compiler_options}
+  -pthread
   -msse
   -msse2
   -msse3
@@ -155,6 +156,7 @@ target_compile_options(client PRIVATE
   -mbulk-memory
   -matomics
   # emscripten ports
+  --use-port=emdawnwebgpu
   -sUSE_BOOST_HEADERS=1
   -sUSE_FREETYPE=1
   ${exception_compile_options}
@@ -207,12 +209,12 @@ set_source_files_properties(${include_files} PROPERTIES COMPILE_FLAGS "-w")
 
 target_link_options(client PRIVATE
   ${opt_and_debug_linker_options}
+  -pthread
+  --use-port=emdawnwebgpu
   -lwebsocket.js
   -sALLOW_MEMORY_GROWTH
   -sSTACK_SIZE=5mb
-  -sWASM_BIGINT
   -sWASM_WORKERS
-  -sUSE_WEBGPU
   -sFETCH
   -sAUDIO_WORKLET
   -sUSE_FREETYPE
