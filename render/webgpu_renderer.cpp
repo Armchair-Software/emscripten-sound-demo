@@ -317,7 +317,6 @@ void webgpu_renderer::init(std::function<void(webgpu_data const&)> &&this_postin
           wgpu::FeatureName::IndirectFirstInstance,
         };
         std::set<wgpu::FeatureName> desired_features{
-          wgpu::FeatureName::ShaderF16,
           wgpu::FeatureName::Float32Filterable,
         };
 
